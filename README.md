@@ -1,27 +1,27 @@
 # Simplex
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 6.0.3.
+Este projeto foi gerado com Angular CLI](https://github.com/angular/angular-cli) version 6.0.3.
 
 ## Development server
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
+Rode `ng serve` para subir um servidor de desenvolvimento. Navegue ate ' `http://localhost:4200/`. O aplicativo irá recarregar se sofrer qualquer mudança no código.
 
 ## Code scaffolding
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+Rode `ng generate component component-name` para gerar um novo componente. Você pode também usar `ng generate directive|pipe|service|class|guard|interface|enum|module`.
 
 ## Build
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
+Rode `ng build` para construir o projeto. Os artefatos (arquivos) criados será armazenado no diretorio `dist/`. Use o parametro `--prod` para contruir a versão de produção.
 
 ## Running unit tests
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+Rode `ng test` para executar os testes de unidade através do [Karma](https://karma-runner.github.io).
 
 ## Running end-to-end tests
 
-Run `ng e2e` to execute the end-to-end tests via [Protractor](http://www.protractortest.org/).
+Rode `ng e2e` para executar o teste end-to-end através [Protractor](http://www.protractortest.org/).
 
 ## Further help
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI README](https://github.com/angular/angular-cli/blob/master/README.md).
+Para obter mais ajuda no Angular CLI use o comando `ng help` ou acesse [Angular CLI README](https://github.com/angular/angular-cli/blob/master/README.md).
