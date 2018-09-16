@@ -2,9 +2,11 @@
   "name": "simplex",
   "version": "0.0.0",
   "scripts": {
+    "postinstall": "npm run build",
     "ng": "ng",
-    "start": "ng serve",
-    "build": "ng build",
+    "start:serve": "ng serve",
+    "start": "node server/express.js",
+    "build": "ng build --prod",
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e"
