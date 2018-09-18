@@ -7,4 +7,27 @@
 	font-family: 'Roboto Thin'
 }
 
+.logo {
+	margin-right: 10px;
+}
+
+.logo .square {
+	height: 40px;
+	display: flex;
+	width: 40px;
+	background: white;
+	border-radius: 8px;
+	margin-right: 4px;
+
+}
+
+.logo .letter{
+	margin: auto;
+	font-size: 2.3rem;
+	color: #3f51b5;
+}
+
+.pointer { 
+	cursor: pointer
+}
 

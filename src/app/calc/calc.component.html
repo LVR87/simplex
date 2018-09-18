@@ -1,0 +1,52 @@
+<mat-vertical-stepper class='form' [linear]="isLinear" #stepper>
+	<mat-step [stepControl]="firstFormGroup">
+		<form class='step' [formGroup]="firstFormGroup">
+			<ng-template matStepLabel>Escolha o Metodo de Resolução</ng-template>
+			<mat-form-field class='full-width'>
+				<mat-select placeholder="Metodo de resolução" formControlName='metodo' required>
+					<mat-option value="option">Simplex / Duas Fases</mat-option>
+					<mat-option value="option">Gráfico</mat-option>
+				</mat-select>
+			</mat-form-field>
+			
+			<div class='action'>
+				<button mat-raised-button color='primary' matStepperNext>AVANÇAR</button>
+			</div>
+		</form>
+	</mat-step>
+
+	<mat-step [stepControl]="secondFormGroup">
+		<form class='step' [formGroup]="secondFormGroup">
+			<ng-template matStepLabel>Defina a Função Objetiva</ng-template>
+
+			<mat-form-field class='full-width'>
+				<mat-select placeholder="Objetivo da Função" formControlName="objetivo" required>
+					<mat-option value="option">Maximizar</mat-option>
+					<mat-option value="option">Minimizar</mat-option>
+				</mat-select>
+			</mat-form-field>
+
+			<mat-form-field class="full-width" *ngFor="let i of xIndice">
+				<input matInput [placeholder]="'X'+i" [formControlName]="'x'+i" required>
+				<mat-icon matSuffix class='pointer' (click)='addX()' *ngIf="i==xIndice.length" >add_circle</mat-icon>
+				<mat-icon matSuffix class='pointer' (click)='delX(i)' *ngIf="i!=xIndice.length" >remove_circle</mat-icon>
+			</mat-form-field>
+			
+			<div class='action'>
+				<button mat-button matStepperPrevious>Voltar</button>
+				<button mat-raised-button color='primary' matStepperNext>AVANÇAR</button>
+			</div>
+		</form>
+	</mat-step>
+
+	
+	<mat-step>
+		<ng-template matStepLabel>Feito</ng-template>
+		Pronto.
+		<div>
+			<button mat-button matStepperPrevious>Voltar</button>
+			<button mat-button (click)="stepper.reset()">Inicio</button>
+		</div>
+	</mat-step>
+</mat-vertical-stepper>
+
