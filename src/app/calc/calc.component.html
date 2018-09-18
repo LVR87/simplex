@@ -39,6 +39,39 @@
 		</form>
 	</mat-step>
 
+
+	<mat-step [stepControl]="thirdFormGroup">
+		<form class='step' [formGroup]="thirdFormGroup">
+			<ng-template matStepLabel>Defina as Restrições</ng-template>
+
+			<ng-container *ngFor="let r of rIndice">
+				<h4>Restrição {{r}}</h4>
+				<ng-container *ngFor="let i of xIndice">
+					<mat-form-field class='restricao-linha' >
+						<input matInput [placeholder]="'X'+i"  required>
+					</mat-form-field>
+					<span *ngIf="i!=xIndice.length">+</span>
+				</ng-container>
+				<mat-form-field class='restricao-linha' >
+					<mat-select placeholder="" value='<='  required>
+						<mat-option value="<="><=</mat-option>
+						<mat-option value=">=">>=</mat-option>
+						<mat-option value="=">=</mat-option>
+					</mat-select>
+				</mat-form-field>
+				<mat-form-field class='restricao-linha' >
+					<input matInput placeholder="R1"  required>
+				</mat-form-field>
+				<button mat-icon-button><mat-icon class='pointer' *ngIf="r==rIndice.length" >add_circle</mat-icon></button>
+				<button mat-icon-button><mat-icon class='pointer' *ngIf="r!=rIndice.length" >remove_circle</mat-icon></button>
+			</ng-container>
+			
+			<div class='action'>
+				<button mat-button matStepperPrevious>Voltar</button>
+				<button mat-raised-button color='primary' matStepperNext>AVANÇAR</button>
+			</div>
+		</form>
+	</mat-step>
 	
 	<mat-step>
 		<ng-template matStepLabel>Feito</ng-template>

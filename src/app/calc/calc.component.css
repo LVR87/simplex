@@ -34,3 +34,12 @@
  	bottom: 10px;
  	right: 10px;
  }
+
+ .restricao-linha{
+ 	margin: 10px;
+	
+ }
+
+ .restricao-linha /deep/ .mat-form-field-infix{
+ 	width: 40px;
+ }
