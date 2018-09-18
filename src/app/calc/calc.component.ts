@@ -52,7 +52,7 @@ export class CalcComponent implements OnInit {
 
 		let indice = 0;
 		this.xIndice = bla.map(b => {
-			this.secondFormGroup.addControl('x' + ++indice, new FormControl(b, Validators.required);
+			this.secondFormGroup.addControl('x' + ++indice, new FormControl(b, Validators.required));
 			return indice;
 		});
 	}
