@@ -7,7 +7,8 @@
 .form {
 	margin: auto;
 	min-width: 300px;
-	max-width: 600px;
+	max-width: 480px;
+	width: 100%;
 }
 
 .container {
@@ -20,12 +21,12 @@
 }
 
 .full-width {
-	width: 100%;
+	width: 100% !important;
 }
 
 .step { 
 	min-height: 50vh;
-	padding-bottom: 30px;
+	padding-bottom: 50px;
  }
 
  .action {
@@ -35,6 +36,10 @@
  	right: 10px;
  }
 
+ .restricao {
+
+ }
+
  .restricao-linha{
  	margin: 10px;
 	
@@ -42,4 +47,17 @@
 
  .restricao-linha /deep/ .mat-form-field-infix{
  	width: 40px;
+ }
+
+ .restricao-x {
+ 	display: block;
+ }
+
+.card{
+	margin: 18px 0px;
+	padding-bottom: 38px;
+}
+
+ .card, .card /deep/ .mat-card-title{
+ 	font-size: 1rem;
  }

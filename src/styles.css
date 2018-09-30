@@ -10,3 +10,11 @@ body, html {
 	color:rgba(0,0,0,0.8);
 	background-color: white;
 }
+
+.flex{
+	display: flex !important;
+}
+
+.fill{
+	margin: auto !important;
+}

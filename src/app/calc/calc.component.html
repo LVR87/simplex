@@ -1,85 +1,98 @@
 <mat-vertical-stepper class='form' [linear]="isLinear" #stepper>
-	<mat-step [stepControl]="firstFormGroup">
-		<form class='step' [formGroup]="firstFormGroup">
-			<ng-template matStepLabel>Escolha o Metodo de Resolução</ng-template>
-			<mat-form-field class='full-width'>
-				<mat-select placeholder="Metodo de resolução" formControlName='metodo' required>
-					<mat-option value="option">Simplex / Duas Fases</mat-option>
-					<mat-option value="option">Gráfico</mat-option>
-				</mat-select>
-			</mat-form-field>
-			
-			<div class='action'>
-				<button mat-raised-button color='primary' matStepperNext>AVANÇAR</button>
-			</div>
-		</form>
-	</mat-step>
+	<mat-step [stepControl]="funcaoFormGroup">
+		<ng-template matStepLabel>Defina a Função Objetiva</ng-template>
 
-	<mat-step [stepControl]="secondFormGroup">
-		<form class='step' [formGroup]="secondFormGroup">
-			<ng-template matStepLabel>Defina a Função Objetiva</ng-template>
-
+		<form class='step' [formGroup]="funcaoFormGroup">
 			<mat-form-field class='full-width'>
-				<mat-select placeholder="Objetivo da Função" formControlName="objetivo" required>
-					<mat-option value="option">Maximizar</mat-option>
-					<mat-option value="option">Minimizar</mat-option>
+				<mat-select placeholder="Objetivo da Função (Z)" formControlName="objetivo" required>
+					<mat-option value="Max">Maximizar</mat-option>
+					<mat-option value="Min">Minimizar</mat-option>
 				</mat-select>
 			</mat-form-field>
 
 			<mat-form-field class="full-width" *ngFor="let i of xIndice">
-				<input matInput [placeholder]="'X'+i" [formControlName]="'x'+i" required>
-				<mat-icon matSuffix class='pointer' (click)='addX()' *ngIf="i==xIndice.length" >add_circle</mat-icon>
-				<mat-icon matSuffix class='pointer' (click)='delX(i)' *ngIf="i!=xIndice.length" >remove_circle</mat-icon>
+				<input matInput type='number' [placeholder]="'X'+i" [formControlName]="'x'+i" required>
+				<mat-icon matSuffix class='pointer' (click)='delX(i)' >remove_circle</mat-icon>
 			</mat-form-field>
-			
-			<div class='action'>
-				<button mat-button matStepperPrevious>Voltar</button>
-				<button mat-raised-button color='primary' matStepperNext>AVANÇAR</button>
-			</div>
+			<button mat-raised-button color='primary' (click)='addX()'>ADICIONAR VARIAVEL</button>
 		</form>
+		
+		<div class='action'>
+			<button mat-button matStepperPrevious>Voltar</button>
+			<button mat-raised-button color='primary' matStepperNext>AVANÇAR</button>
+		</div>
 	</mat-step>
 
 
-	<mat-step [stepControl]="thirdFormGroup">
-		<form class='step' [formGroup]="thirdFormGroup">
-			<ng-template matStepLabel>Defina as Restrições</ng-template>
+	<mat-step [stepControl]="restricaoFormGroup">
+		<ng-template matStepLabel>Defina as Restrições</ng-template>
+		<form  class='step' [formGroup]="restricaoFormGroup">
+			<div class='restricao' *ngFor="let r of rIndice">
+				<span [class.restricao-x]='xIndice.length>2'>
+					<ng-container *ngFor="let x of xIndice">
+						<mat-form-field class='restricao-linha' >
+							<input matInput  type='number'  [placeholder]="'X'+x"  [formControlName]="'r'+r+'x'+x" required>
+						</mat-form-field>
+						<span *ngIf="x!=xIndice.length">+</span>
+					</ng-container>
+				</span>
 
-			<ng-container *ngFor="let r of rIndice">
-				<h4>Restrição {{r}}</h4>
-				<ng-container *ngFor="let i of xIndice">
-					<mat-form-field class='restricao-linha' >
-						<input matInput [placeholder]="'X'+i"  required>
-					</mat-form-field>
-					<span *ngIf="i!=xIndice.length">+</span>
-				</ng-container>
 				<mat-form-field class='restricao-linha' >
-					<mat-select placeholder="" value='<='  required>
+					<mat-select placeholder=""  [formControlName]="'r'+r+'op'" required>
 						<mat-option value="<="><=</mat-option>
 						<mat-option value=">=">>=</mat-option>
 						<mat-option value="=">=</mat-option>
 					</mat-select>
 				</mat-form-field>
+
 				<mat-form-field class='restricao-linha' >
-					<input matInput placeholder="R1"  required>
+					<input matInput type='number' [placeholder]="'R'+r"  [formControlName]="'r'+r" required>
+					<mat-icon matSuffix class='pointer' (click)='delR(r)' >remove_circle</mat-icon>
 				</mat-form-field>
-				<button mat-icon-button><mat-icon class='pointer' *ngIf="r==rIndice.length" >add_circle</mat-icon></button>
-				<button mat-icon-button><mat-icon class='pointer' *ngIf="r!=rIndice.length" >remove_circle</mat-icon></button>
-			</ng-container>
-			
+				
+			</div>
+			<div>
+				<button mat-raised-button color='primary' (click)='addR()'>ADICIONAR RESTRIÇÃO</button>
+			</div>
+
 			<div class='action'>
 				<button mat-button matStepperPrevious>Voltar</button>
 				<button mat-raised-button color='primary' matStepperNext>AVANÇAR</button>
 			</div>
 		</form>
 	</mat-step>
-	
+
 	<mat-step>
-		<ng-template matStepLabel>Feito</ng-template>
-		Pronto.
-		<div>
-			<button mat-button matStepperPrevious>Voltar</button>
+		<ng-template matStepLabel>Calcular</ng-template>
+		<ng-container *ngIf="restricaoFormGroup.valid">
+
+			<mat-card class='card'>
+
+				<mat-card-title>Função Objetiva:</mat-card-title>
+				<mat-card-subtitle>{{labelFO}}</mat-card-subtitle>
+
+				<mat-card-title>Variaveis:</mat-card-title>
+				<mat-card-subtitle><span *ngFor="let x of xIndice"> x{{x}} </span></mat-card-subtitle>
+
+				<mat-card-title>Restrições:</mat-card-title>
+				<mat-card-subtitle *ngFor="let r of labelRestricao;index as i"> R{{i}}: {{r}}</mat-card-subtitle>
+				<mat-card-actions class='flex'>
+					<span class='fill'></span>
+					<button mat-raised-button color='primary'> Grafico </button>
+					<span class='fill'></span>
+					<button mat-raised-button color='primary'> Simplex </button>
+					<span class='fill'></span>
+				</mat-card-actions>
+			</mat-card>
+
+		</ng-container>
+
+		<div >
 			<button mat-button (click)="stepper.reset()">Inicio</button>
+			<button mat-button matStepperPrevious>Voltar</button>
+			<button mat-button (click)="stepper.reset()">Calcular</button>
 		</div>
 	</mat-step>
 </mat-vertical-stepper>
+
 
