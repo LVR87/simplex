@@ -4,12 +4,19 @@
 	display: flex;
 }
 
-.form {
+.form{
+	margin: auto;
+	min-width: 320px;
+	width: 100%;
+	max-width: 640px;
+}
+.step {
 	margin: auto;
 	min-width: 300px;
-	max-width: 480px;
+	max-width: 420px;
 	width: 100%;
 }
+
 
 .container {
 	display: flex;
@@ -58,6 +65,13 @@
 	padding-bottom: 38px;
 }
 
+
  .card, .card /deep/ .mat-card-title{
  	font-size: 1rem;
+ 	text-align: left;
  }
+
+ .card /deep/ .mat-card-subtitle{
+	margin-left: 18px;
+ }
+

@@ -1,4 +1,9 @@
 <mat-vertical-stepper class='form' [linear]="isLinear" #stepper>
+	<mat-step *ngIf="showGrafico">
+		<ng-template matStepLabel>Gráfico</ng-template>
+		<app-grafico [restricoes]='restricoes' [funcao]='funcao'></app-grafico>
+	</mat-step>
+	
 	<mat-step [stepControl]="funcaoFormGroup">
 		<ng-template matStepLabel>Defina a Função Objetiva</ng-template>
 
@@ -63,7 +68,7 @@
 	</mat-step>
 
 	<mat-step>
-		<ng-template matStepLabel>Calcular</ng-template>
+		<ng-template matStepLabel>Metodo</ng-template>
 		<ng-container *ngIf="restricaoFormGroup.valid">
 
 			<mat-card class='card'>
@@ -75,23 +80,35 @@
 				<mat-card-subtitle><span *ngFor="let x of xIndice"> x{{x}} </span></mat-card-subtitle>
 
 				<mat-card-title>Restrições:</mat-card-title>
-				<mat-card-subtitle *ngFor="let r of labelRestricao;index as i"> R{{i}}: {{r}}</mat-card-subtitle>
+				<mat-card-subtitle *ngFor="let r of labelRestricao;index as i">{{r}}</mat-card-subtitle>
+
+				<mat-card-title>Não negatividade:</mat-card-title>
+				<mat-card-subtitle><p *ngFor="let x of xIndice"> x{{x}} >= 0 </p></mat-card-subtitle>
+
 				<mat-card-actions class='flex'>
 					<span class='fill'></span>
-					<button mat-raised-button color='primary'> Grafico </button>
+					<button mat-raised-button color='primary' (click)='grafico()' matStepperNext [disabled]="disabledGrafico"> Grafico </button>
 					<span class='fill'></span>
-					<button mat-raised-button color='primary'> Simplex </button>
+					<button mat-raised-button color='primary' (click)='simplex()' matStepperNext> Simplex </button>
 					<span class='fill'></span>
 				</mat-card-actions>
+
 			</mat-card>
 
 		</ng-container>
 
-		<div >
-			<button mat-button (click)="stepper.reset()">Inicio</button>
+		<div class='flex'>
+			<span class='fill'></span>
+			<button mat-icon-button (click)="stepper.reset()">Inicio</button>
+			<span class='fill'></span>
 			<button mat-button matStepperPrevious>Voltar</button>
-			<button mat-button (click)="stepper.reset()">Calcular</button>
+			<span class='fill'></span>
 		</div>
+	</mat-step>
+	
+	<mat-step *ngIf="showSimplex">
+		<ng-template matStepLabel>Simplex</ng-template>
+		<app-simplex></app-simplex>
 	</mat-step>
 </mat-vertical-stepper>
 
