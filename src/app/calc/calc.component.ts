@@ -1,12 +1,15 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-
+import { GraficoComponent } from './grafico/grafico.component';
 @Component({
 	selector: 'app-calc',
 	templateUrl: './calc.component.html',
 	styleUrls: ['./calc.component.css']
 })
 export class CalcComponent implements OnInit {
+	@ViewChild(GraficoComponent)
+	grafico: GraficoComponent;
+
 	isLinear = true;
 	funcaoFormGroup: FormGroup;
 	restricaoFormGroup: FormGroup;
@@ -20,8 +23,8 @@ export class CalcComponent implements OnInit {
 	restricoes: any[];
 
 	disabledGrafico: boolean;
-	showGrafico: boolean;
-	showSimplex: boolean;
+	showGraficoComp: boolean;
+	showSimplexComp: boolean;
 
 
 	private sub: any[];
@@ -53,42 +56,13 @@ export class CalcComponent implements OnInit {
 			}
 		}));
 
-		this.restricaoFormGroup = new FormGroup({});
-		this.sub.push(this.restricaoFormGroup.valueChanges.subscribe(form => {
-
-			let restricoesCtrl = this.rIndice.map(r => Object.keys(form).filter(k => k.includes('r' + r)).map(k => k));
-			this.restricoes = restricoesCtrl.order(r => r).map(r => r.map(r => form[r]));
-
-			let i = 0;
-			this.labelRestricao = restricoesCtrl.map(r => {
-				let label = this.xIndice.map(x => r.filter(r => r.includes('x' + x))
-					.map(r => form[r] == 1 ? 'x' + x : form[r] + '.x' + x)
-					.filter(r => !r.includes('0')))
-					.toString()
-					.replace(',', ' + ')
-					.trim();
-				if (label.endsWith('+'))
-					label = label.substr(0, label.length - 2).trim();
-				if (label.startsWith('+'))
-					label = label.substr(1, label.length - 1).trim();
-
-				label += ' ' + form[r.find(r => r.includes('op'))];
-				label += ' ' + form[r.find(r => r === 'r' + ++i)];
-
-				return label;
-			});
-
-			this.disabledGrafico = this.xIndice.length > 2;
-
-		}));
-
 
 		this.addX();
 
-		// this.loadEx2();
+		this.loadEx2();
 		// this.loadEx4();
-		this.loadExPhPSimplexGrafico();
-		this.grafico();
+		// this.loadExPhPSimplexGrafico();
+		this.showGrafico();
 	}
 
 	ngOnDestroy() {
@@ -96,85 +70,52 @@ export class CalcComponent implements OnInit {
 	}
 
 
-	grafico() {
-		this.showGrafico = true;
-		this.showSimplex = false;
+	showGrafico() {
+		this.showGraficoComp = true;
+		this.showSimplexComp = false;
+		setTimeout(() => {
+			this.grafico.restricoes = this.restricoes;
+			this.grafico.funcao = this.funcao;
+			this.grafico.loadComponents();
+		});
 	}
 
-	simplex() {
-		this.showSimplex = true;
-		this.showGrafico = false;
+	showSimplex() {
+		this.showSimplexComp = true;
+		this.showGraficoComp = false;
 	}
 
-	loadEx2() {
-		// 1 passo
-		this.addX();
-		this.funcaoFormGroup.controls['objetivo'].setValue('Max');
-		this.funcaoFormGroup.controls['x1'].setValue(100);
-		this.funcaoFormGroup.controls['x2'].setValue(150);
-
-		// 2 pass
-		this.restricaoFormGroup.controls['r1x1'].setValue(2);
-		this.restricaoFormGroup.controls['r1x2'].setValue(3);
-		this.restricaoFormGroup.controls['r1op'].setValue('<=');
-		this.restricaoFormGroup.controls['r1'].setValue(120);
-		this.addR();
-		this.restricaoFormGroup.controls['r2x1'].setValue(1);
-		this.restricaoFormGroup.controls['r2x2'].setValue(0);
-		this.restricaoFormGroup.controls['r2op'].setValue('<=');
-		this.restricaoFormGroup.controls['r2'].setValue(40);
-		this.addR();
-		this.restricaoFormGroup.controls['r3x1'].setValue(0);
-		this.restricaoFormGroup.controls['r3x2'].setValue(1);
-		this.restricaoFormGroup.controls['r3op'].setValue('<=');
-		this.restricaoFormGroup.controls['r3'].setValue(30);
+	getRestricoes() {
+		return this.restricoes;
 	}
 
-	loadEx4() {
-		// 1 passo
-		this.addX();
-		this.funcaoFormGroup.controls['objetivo'].setValue('Max');
-		this.funcaoFormGroup.controls['x1'].setValue(6);
-		this.funcaoFormGroup.controls['x2'].setValue(8);
+	loadRestricoes(form?) {
+		if (!form) form = this.restricaoFormGroup;
 
-		// 2 pass
-		this.restricaoFormGroup.controls['r1x1'].setValue(4);
-		this.restricaoFormGroup.controls['r1x2'].setValue(10);
-		this.restricaoFormGroup.controls['r1op'].setValue('<=');
-		this.restricaoFormGroup.controls['r1'].setValue(600);
-		this.addR();
-		this.restricaoFormGroup.controls['r2x1'].setValue(8);
-		this.restricaoFormGroup.controls['r2x2'].setValue(4);
-		this.restricaoFormGroup.controls['r2op'].setValue('<=');
-		this.restricaoFormGroup.controls['r2'].setValue(400);
-		
-	}
+		let restricoesCtrl = this.rIndice.map(r => Object.keys(form).filter(k => k.includes('r' + r))).filter(r => r.length > 0);
+		this.restricoes = restricoesCtrl.map(r => r.order(r=>r).map(r => form[r]));
 
-	loadExPhPSimplexGrafico() {
-		// 1 passo
-		this.addX();
-		this.funcaoFormGroup.controls['objetivo'].setValue('Max');
-		this.funcaoFormGroup.controls['x1'].setValue(3);
-		this.funcaoFormGroup.controls['x2'].setValue(2);
+		let i = 0;
+		this.labelRestricao = restricoesCtrl.map(r => {
+			let label = this.xIndice.map(x => r.filter(r => r.includes('x' + x))
+				.map(r => form[r] == 1 ? 'x' + x : form[r] + '.x' + x)
+				.filter(r => !r.includes('0')))
+				.toString()
+				.replace(',', ' + ')
+				.trim();
+			if (label.endsWith('+'))
+				label = label.substr(0, label.length - 2).trim();
+			if (label.startsWith('+'))
+				label = label.substr(1, label.length - 1).trim();
 
-		// 2 pass
-		this.restricaoFormGroup.controls['r1x1'].setValue(2);
-		this.restricaoFormGroup.controls['r1x2'].setValue(1);
-		this.restricaoFormGroup.controls['r1op'].setValue('<=');
-		this.restricaoFormGroup.controls['r1'].setValue(18);
-		this.addR();
-		this.restricaoFormGroup.controls['r2x1'].setValue(2);
-		this.restricaoFormGroup.controls['r2x2'].setValue(3);
-		this.restricaoFormGroup.controls['r2op'].setValue('<=');
-		this.restricaoFormGroup.controls['r2'].setValue(42);
-		this.addR();
-		this.restricaoFormGroup.controls['r3x1'].setValue(3);
-		this.restricaoFormGroup.controls['r3x2'].setValue(1);
-		this.restricaoFormGroup.controls['r3op'].setValue('<=');
-		this.restricaoFormGroup.controls['r3'].setValue(24);
-		
-	}
+			label += ' ' + form[r.find(r => r.includes('op'))];
+			label += ' ' + form[r.find(r => r === 'r' + ++i)];
 
+			return label;
+		});
+
+		this.disabledGrafico = this.xIndice.length > 2;
+	};
 
 	addX() {
 		this.funcaoFormGroup.addControl('x' + (this.xIndice.length + 1), new FormControl('', Validators.required))
@@ -201,12 +142,19 @@ export class CalcComponent implements OnInit {
 		});
 
 		if (this.xIndice.length == 0) this.addX();
+		this.buildFormRestricao();
 	}
 
+	
 
 	buildFormRestricao() {
-		this.restricaoFormGroup.reset();
 		this.rIndice = [];
+		if (!this.restricaoFormGroup) {
+			this.restricaoFormGroup = new FormGroup({});
+			this.sub.add(this.restricaoFormGroup.valueChanges.subscribe(form=>this.loadRestricoes(form)));
+		} else {
+			Object.keys(this.restricaoFormGroup.controls).map(k => this.restricaoFormGroup.removeControl(k));
+		}
 		this.addR();
 	}
 
@@ -220,14 +168,13 @@ export class CalcComponent implements OnInit {
 			this.restricaoFormGroup.addControl(name, new FormControl('', Validators.required));
 		});
 
-
 		this.rIndice.push(this.rIndice.length + 1);
 	}
 
 	delR(i) {
+		console.log('r' + i);
 		this.restricaoFormGroup.removeControl('r' + i);
 		this.restricaoFormGroup.removeControl('r' + i + 'op');
-
 		this.xIndice.map(x => this.restricaoFormGroup.removeControl('r' + i + 'x' + x));
 
 		this.rIndice.splice(i - 1, 1);
@@ -235,42 +182,131 @@ export class CalcComponent implements OnInit {
 		let bla = [];
 		this.rIndice.forEach(i => {
 			let l = [];
-			let ctl = this.funcaoFormGroup.get('r' + i);
-			l.push(ctl ? ctl.value : '');
-			this.funcaoFormGroup.removeControl('r' + i);
 
-			ctl = this.funcaoFormGroup.get('r' + i + 'op');
+			let ctl = this.restricaoFormGroup.get('r' + i);
 			l.push(ctl ? ctl.value : '');
-			this.funcaoFormGroup.removeControl('r' + i + 'op');
+			this.restricaoFormGroup.removeControl('r' + i);
+
+			ctl = this.restricaoFormGroup.get('r' + i + 'op');
+			l.push(ctl ? ctl.value : '');
+			this.restricaoFormGroup.removeControl('r' + i + 'op');
 
 			let x = [];
 			this.xIndice.map(() => {
 				let name = 'r' + i + 'x' + x.length + 1;
-				ctl = this.funcaoFormGroup.get(name);
+				ctl = this.restricaoFormGroup.get(name);
 				x.push(ctl ? ctl.value : '');
-				this.funcaoFormGroup.removeControl(name);
+				this.restricaoFormGroup.removeControl(name);
 			});
 			l.push(x);
 			bla.push(l);
 		});
 
-		let indice = 0;
-		this.rIndice = bla.map(l => {
-			indice++;
+		console.log('bla',bla);
 
-			this.funcaoFormGroup.addControl('r' + indice, new FormControl(l[0], Validators.required))
-			this.funcaoFormGroup.addControl('r' + indice + 'op', new FormControl(l[1], Validators.required))
+		let indiceR = 0;
+		this.rIndice = bla.map(l => {
+			indiceR++;
 
 			let indiceX = 1;
 			l[2].forEach(xx => {
-				this.funcaoFormGroup.addControl('r' + indice + 'x' + indiceX++, new FormControl(xx, Validators.required))
+				this.restricaoFormGroup.addControl('r' + indiceR + 'x' + indiceX++, new FormControl(xx, Validators.required))
 			});
-			return indice;
+
+			this.restricaoFormGroup.addControl('r' + indiceR + 'op', new FormControl(l[1], Validators.required));
+			this.restricaoFormGroup.addControl('r' + indiceR, new FormControl(l[0], Validators.required));
+
+			return indiceR;
 		});
 
-		if (this.rIndice.length == 0) this.addR();
+		if (this.rIndice.length == 0) this.buildFormRestricao();
 	}
 
+	loadEx2() {
+		console.log('loading exercicio 02...');
+		
+		// 1 passo
+		this.addX();
+		this.funcaoFormGroup.controls['objetivo'].setValue('Max');
+		this.funcaoFormGroup.controls['x1'].setValue(100);
+		this.funcaoFormGroup.controls['x2'].setValue(150);
+
+		// 2 pass
+		this.restricaoFormGroup.controls['r1x1'].setValue(2);
+		this.restricaoFormGroup.controls['r1x2'].setValue(3);
+		this.restricaoFormGroup.controls['r1op'].setValue('<=');
+		this.restricaoFormGroup.controls['r1'].setValue(120);
+		this.addR();
+		this.restricaoFormGroup.controls['r2x1'].setValue(1);
+		this.restricaoFormGroup.controls['r2x2'].setValue(0);
+		this.restricaoFormGroup.controls['r2op'].setValue('<=');
+		this.restricaoFormGroup.controls['r2'].setValue(40);
+		this.addR();
+		this.restricaoFormGroup.controls['r3x1'].setValue(0);
+		this.restricaoFormGroup.controls['r3x2'].setValue(1);
+		this.restricaoFormGroup.controls['r3op'].setValue('<=');
+		this.restricaoFormGroup.controls['r3'].setValue(30);
+		this.addR();
+		this.restricaoFormGroup.controls['r4x1'].setValue(1);
+		this.restricaoFormGroup.controls['r4x2'].setValue(0);
+		this.restricaoFormGroup.controls['r4op'].setValue('>=');
+		this.restricaoFormGroup.controls['r4'].setValue(10);
+		this.addR();
+		this.restricaoFormGroup.controls['r5x1'].setValue(0);
+		this.restricaoFormGroup.controls['r5x2'].setValue(1);
+		this.restricaoFormGroup.controls['r5op'].setValue('>=');
+		this.restricaoFormGroup.controls['r5'].setValue(5);
+		this.addR();
+		this.restricaoFormGroup.controls['r6x1'].setValue(1);
+		this.restricaoFormGroup.controls['r6x2'].setValue(2);
+		this.restricaoFormGroup.controls['r6op'].setValue('>=');
+		this.restricaoFormGroup.controls['r6'].setValue(30);
+	}
+
+	loadEx4() {
+		// 1 passo
+		this.addX();
+		this.funcaoFormGroup.controls['objetivo'].setValue('Max');
+		this.funcaoFormGroup.controls['x1'].setValue(6);
+		this.funcaoFormGroup.controls['x2'].setValue(8);
+
+		// 2 pass
+		this.restricaoFormGroup.controls['r1x1'].setValue(4);
+		this.restricaoFormGroup.controls['r1x2'].setValue(10);
+		this.restricaoFormGroup.controls['r1op'].setValue('<=');
+		this.restricaoFormGroup.controls['r1'].setValue(600);
+		this.addR();
+		this.restricaoFormGroup.controls['r2x1'].setValue(8);
+		this.restricaoFormGroup.controls['r2x2'].setValue(4);
+		this.restricaoFormGroup.controls['r2op'].setValue('<=');
+		this.restricaoFormGroup.controls['r2'].setValue(400);
+
+	}
+
+	loadExPhPSimplexGrafico() {
+		// 1 passo
+		this.addX();
+		this.funcaoFormGroup.controls['objetivo'].setValue('Max');
+		this.funcaoFormGroup.controls['x1'].setValue(3);
+		this.funcaoFormGroup.controls['x2'].setValue(2);
+
+		// 2 pass
+		this.restricaoFormGroup.controls['r1x1'].setValue(2);
+		this.restricaoFormGroup.controls['r1x2'].setValue(1);
+		this.restricaoFormGroup.controls['r1op'].setValue('<=');
+		this.restricaoFormGroup.controls['r1'].setValue(18);
+		this.addR();
+		this.restricaoFormGroup.controls['r2x1'].setValue(2);
+		this.restricaoFormGroup.controls['r2x2'].setValue(3);
+		this.restricaoFormGroup.controls['r2op'].setValue('<=');
+		this.restricaoFormGroup.controls['r2'].setValue(42);
+		this.addR();
+		this.restricaoFormGroup.controls['r3x1'].setValue(3);
+		this.restricaoFormGroup.controls['r3x2'].setValue(1);
+		this.restricaoFormGroup.controls['r3op'].setValue('<=');
+		this.restricaoFormGroup.controls['r3'].setValue(24);
+
+	}
 
 }
 

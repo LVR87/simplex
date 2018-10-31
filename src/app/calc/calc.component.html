@@ -1,7 +1,8 @@
 <mat-vertical-stepper class='form' [linear]="isLinear" #stepper>
-	<mat-step *ngIf="showGrafico">
+	
+	<mat-step *ngIf="showGraficoComp">
 		<ng-template matStepLabel>Gráfico</ng-template>
-		<app-grafico [restricoes]='restricoes' [funcao]='funcao'></app-grafico>
+		<app-grafico></app-grafico>
 	</mat-step>
 	
 	<mat-step [stepControl]="funcaoFormGroup">
@@ -62,7 +63,7 @@
 
 			<div class='action'>
 				<button mat-button matStepperPrevious>Voltar</button>
-				<button mat-raised-button color='primary' matStepperNext>AVANÇAR</button>
+				<button mat-raised-button color='primary' matStepperNext (click)='teste()'>AVANÇAR</button>
 			</div>
 		</form>
 	</mat-step>
@@ -87,9 +88,9 @@
 
 				<mat-card-actions class='flex'>
 					<span class='fill'></span>
-					<button mat-raised-button color='primary' (click)='grafico()' matStepperNext [disabled]="disabledGrafico"> Grafico </button>
+					<button mat-raised-button color='primary' (click)='showGrafico()' matStepperNext [disabled]="disabledGrafico"> Grafico </button>
 					<span class='fill'></span>
-					<button mat-raised-button color='primary' (click)='simplex()' matStepperNext> Simplex </button>
+					<button mat-raised-button color='primary' (click)='showSimplex()' matStepperNext> Simplex </button>
 					<span class='fill'></span>
 				</mat-card-actions>
 
@@ -106,10 +107,12 @@
 		</div>
 	</mat-step>
 	
-	<mat-step *ngIf="showSimplex">
+	<mat-step *ngIf="showSimplexComp">
 		<ng-template matStepLabel>Simplex</ng-template>
 		<app-simplex></app-simplex>
 	</mat-step>
+
+
 </mat-vertical-stepper>
 
 
