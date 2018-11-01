@@ -59,8 +59,8 @@ export class CalcComponent implements OnInit {
 
 		this.addX();
 
-		this.loadEx2();
-		// this.loadEx4();
+		// this.loadEx2();
+		this.loadEx4();
 		// this.loadExPhPSimplexGrafico();
 		this.showGrafico();
 	}
@@ -77,7 +77,7 @@ export class CalcComponent implements OnInit {
 			this.grafico.restricoes = this.restricoes;
 			this.grafico.funcao = this.funcao;
 			this.grafico.loadComponents();
-		});
+		},250);
 	}
 
 	showSimplex() {
@@ -261,6 +261,16 @@ export class CalcComponent implements OnInit {
 		this.restricaoFormGroup.controls['r6x2'].setValue(2);
 		this.restricaoFormGroup.controls['r6op'].setValue('>=');
 		this.restricaoFormGroup.controls['r6'].setValue(30);
+		this.addR();
+		this.restricaoFormGroup.controls['r7x1'].setValue(1);
+		this.restricaoFormGroup.controls['r7x2'].setValue(0);
+		this.restricaoFormGroup.controls['r7op'].setValue('=');
+		this.restricaoFormGroup.controls['r7'].setValue(13);
+		this.addR();
+		this.restricaoFormGroup.controls['r8x1'].setValue(0);
+		this.restricaoFormGroup.controls['r8x2'].setValue(1);
+		this.restricaoFormGroup.controls['r8op'].setValue('=');
+		this.restricaoFormGroup.controls['r8'].setValue(20);
 	}
 
 	loadEx4() {

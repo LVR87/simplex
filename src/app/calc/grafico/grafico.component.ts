@@ -25,17 +25,24 @@ export class GraficoComponent implements OnInit {
 		'rgba(255, 99, 132, 0.4)',
 		'rgba(75, 192, 192, 0.4)',
 		'rgba(153, 102, 255, 0.4)',
-		'rgba(255, 159, 64, 0.4)',
-		'rgba(100, 100, 100, 0.4)',
+		'rgba(92, 64, 51, 0.4)',
+		'rgba(255, 28, 174, 0.4)',
+		'rgba(0, 255, 0, 0.4)',
+		'rgba(66, 111, 66, 0.4)',
+		'rgba(165, 128, 100, 0.4)'
 	];
 	private borderColor = [
 		'rgba(255, 206, 86, 1)',
 		'rgba(54, 162, 235, 1)',
-		'rgba(255,99,132,1)',
+		'rgba(255, 99, 132, 1)',
 		'rgba(75, 192, 192, 1)',
 		'rgba(153, 102, 255, 1)',
-		'rgba(100, 100, 100, 1)'
-	];;
+		'rgba(92, 64, 51, 1)',
+		'rgba(255, 28, 174, 1)',
+		'rgba(0, 255, 0, 1)',
+		'rgba(66, 111, 66, 1)',
+		'rgba(165, 128, 100, 1)'
+	];
 
 	private pipe: CurrencyPipe;
 	constructor(
@@ -45,26 +52,34 @@ export class GraficoComponent implements OnInit {
 	}
 
 	ngOnInit() {
-		if (!!this.restricoes && !!this.funcao)
-			this.loadComponents();
+		setTimeout(() => {
+			this.buildChart();
+			if (!!this.restricoes && !!this.funcao)
+				this.loadComponents();
+		});
 	}
 
 	loadComponents() {
-		let coordRegioesRestricoes = this.buildRegioes(Object.assign([], this.restricoes));
+		let coordRegioesRestricoes = this.buildRegiaoResticao(Object.assign([], this.restricoes));
 		console.log('coordRegioesRestricoes', coordRegioesRestricoes);
 
 		let coordRegiaoInteresse = this.loadRegiaoInteresse(Object.assign([], this.restricoes)).filter(r => r.p.t);
 		console.log('coordRegiaoInteresse', coordRegiaoInteresse);
 
+		let melhorPonto = this.loadMelhorPontoInteresse(coordRegiaoInteresse);
 
-		let valor = this.funcao[0].toUpperCase() === 'MAX' ?
-			Math.max(...coordRegiaoInteresse.map(r => this.valorZ(r.p.x, r.p.y)))
-			: Math.min(...coordRegiaoInteresse.map(r => this.valorZ(r.p.x, r.p.y)));
 
-		let melhorPonto = coordRegiaoInteresse.filter(r => this.valorZ(r.p.x, r.p.y) == valor);
 		console.log('melhorPonto', melhorPonto);
 
-		setTimeout(() => this.buildChart(coordRegioesRestricoes, coordRegiaoInteresse, melhorPonto));
+		this.loadChart(coordRegioesRestricoes, coordRegiaoInteresse, melhorPonto);
+	}
+
+	loadMelhorPontoInteresse(coord) {
+		let valor = this.funcao[0].toUpperCase() === 'MAX' ?
+			Math.max(...coord.map(r => this.valorZ(r.p.x, r.p.y)))
+			: Math.min(...coord.map(r => this.valorZ(r.p.x, r.p.y)));
+
+		return coord.filter(r => this.valorZ(r.p.x, r.p.y) == valor);
 	}
 
 	testeRegiao(x1, x2) {
@@ -89,63 +104,76 @@ export class GraficoComponent implements OnInit {
 	}
 
 
-	buildRegioes(restricoes) {
-		return restricoes.map(r => r.filter(r => Number.isInteger(r))).map((r, i) => {
-			let p0 = {
+	buildRegiaoResticao(restricoes) {
+		return restricoes.map(r1 => r1.filter(r => Number.isInteger(r))).map((r, i) => {
+			let p1 = {
 				x: r[1] == 0 ? 0 : r[0] / r[1]
 				, y: 0
-			}
-			p0['t'] = this.testeRegiao(p0.x, p0.y);
-
-			let p1 = {
-				x: 0
-				, y: r[2] == 0 ? 0 : r[0] / r[2]
+				, op: restricoes[i][1]
 			}
 			p1['t'] = this.testeRegiao(p1.x, p1.y);
 
-			return [p0, p1]
-		}).map((r, i) => { // atribuindo o infinito quando uma constante
-			let p1 = r[0];
-			let p2 = r[1];
+			let p2 = {
+				x: 0
+				, y: r[2] == 0 ? 0 : r[0] / r[2]
+				, op: restricoes[i][1]
+			}
+			p2['t'] = this.testeRegiao(p2.x, p2.y);
+
 			if (p1.x == 0 && p1.y == 0) {
 				p1.x = this.infinity;
 				p1.y = p2.y;
 			}
+
 			if (p2.x == 0 && p2.y == 0) {
 				p2.x = p2.x;
 				p2.y = this.infinity;
 			}
-			console.log('r' + (i + 1), p1, p2);
+			let ps1 = p1.x > p2.x ? p2 : p1;
+			let ps2 = p1.x <= p2.x ? p2 : p1;
+			return [ps1, ps2]
+
+		}).map((r, i) => { // atribuindo o infinito quando uma constante
+			let p1 = r[0];
+			let p2 = r[1];
+
+			if (p1.op === '>=' && p1.x == 0)
+				r.add({ x: -this.infinity, y: this.infinity, op: p1.op, t: false });
+			if (p2.op === '>=' && p2.y == 0)
+				r.add({ x: this.infinity, y: -this.infinity, op: p2.op, t: false });
 			return r;
+
 		}).map(r => { // teste de regiao
 			r[0]['t'] = this.testeRegiao(r[0].x, r[0].y);
 			r[1]['t'] = this.testeRegiao(r[1].x, r[1].y);
 			return r;
-		});
+		}).map(r => r.order(r => r.x).order(r => r.y, true));
 	}
 
 	loadRegiaoInteresse(restricoes) {
 		console.log('---- interesse');
-		let regioes = this.buildRegioes(restricoes);
+		let regioes = this.buildRegiaoResticao(restricoes);
 		console.log('regioes', regioes);
 
 		let mX = Math.max(...regioes.map(p => Math.max(...p.map(p => p.x !== this.infinity ? p.x : 0))));
 		let mY = Math.max(...regioes.map(p => Math.max(...p.map(p => p.y !== this.infinity ? p.y : 0))));
 		//equacao geral de reta 
-		let egr = regioes.map(r => {
-			let p1 = r[0].x > r[1].x ? r[1] : r[0];
-			let p2 = r[0].x <= r[1].x ? r[1] : r[0];
-			return [p1, p2];//ordenando os pontos
-		}).map(r => {
-			let p1 = r[0]; // let p1 = { x: 0, y: 1 };
-			let p2 = r[1]; // let p2 = { x: 1, y: 3 };
+		let egr = regioes.map(r => r.order(r => r.x).order(r => r.y, true))
+			.map(r => {
+				let i = 0;
+				if (r.length > 2)
+					i++;
 
-			let x = (p1.y * 1) - (1 * p2.y);
-			let y = (1 * p2.x) - (p1.x * 1);
-			if (y == 0) y = 1;
-			let c = (1 * p1.x * p2.y) - (1 * p1.y * p2.x);
-			return { p1: p1, p2: p2, eqr: [x * -1 / y, 0, c * -1 / y] }; //reduzida
-		});
+				let p1 = r[i++]; // let p1 = { x: 0, y: 1 };
+				let p2 = r[i++]; // let p2 = { x: 1, y: 3 };
+
+				let x = (p1.y * 1) - (1 * p2.y);
+				let y = (1 * p2.x) - (p1.x * 1);
+				if (y == 0) y = 1;
+				let c = (1 * p1.x * p2.y) - (1 * p1.y * p2.x);
+				return { p1: p1, p2: p2, eqr: [x * -1 / y, 0, c * -1 / y] }; //reduzida
+			});
+		console.log('egr', egr);
 
 		let coord = [];
 		egr.map((r, i) => {
@@ -161,22 +189,20 @@ export class GraficoComponent implements OnInit {
 				let p = { x: (b == 0 ? 0 : a / b), y: (e1[0] * (b == 0 ? 0 : a / b) + e1[2]) };
 				p['t'] = this.testeRegiao(p.x, p.y);
 
-				console.log('coord', { r1: r1, r2: r2, p: p });
 				coord.push({ r1: r1, r2: r2, p: p });
 			});
 		});
-		console.log('bla', coord);
 		return coord;
 	}
 
 	buildDatasetMelhorPonto(coord) {
 
 		let data = [];
-		data.addRange(coord.map(c=>c.p));
+		data.addRange(coord.map(c => c.p));
 		return {
 			type: 'line',
 			fill: false,
-			showLine : true,
+			showLine: true,
 			label: 'Melhor Ponto',
 			data: data,
 			backgroundColor: 'rgba(255,0,0,0.5)',
@@ -186,12 +212,16 @@ export class GraficoComponent implements OnInit {
 
 	builDatasetInteresse(coord) {
 
+		let dataTemp = [];
+		dataTemp.addRange(coord.filter(c => c.p.t).map(c => c.p));
+		dataTemp.addRange(coord.filter(c => c.r1.p1.t).map(c => c.r1.p1));
+		dataTemp.addRange(coord.filter(c => c.r1.p2.t).map(c => c.r1.p2));
+		dataTemp.addRange(coord.filter(c => c.r2.p1.t).map(c => c.r2.p1));
+		dataTemp.addRange(coord.filter(c => c.r2.p2.t).map(c => c.r2.p2));
+
 		let data = [];
-		data.addRange(coord.filter(c => c.p.t).map(c => c.p));
-		data.addRange(coord.filter(c => c.r1.p1.t).map(c => c.r1.p1));
-		data.addRange(coord.filter(c => c.r1.p2.t).map(c => c.r1.p2));
-		data.addRange(coord.filter(c => c.r2.p1.t).map(c => c.r2.p1));
-		data.addRange(coord.filter(c => c.r2.p2.t).map(c => c.r2.p2));
+		dataTemp.map(d => data.add(d, o => o.x == d.x && o.y == d.y));
+
 		console.log('builDatasetInteresse', data);
 
 		return {
@@ -200,19 +230,18 @@ export class GraficoComponent implements OnInit {
 			// showLine : true,
 			label: 'Interesse',
 			data: data,
-			backgroundColor: this.backgroundColor.last(),
-			borderColor: this.borderColor.last()
+			backgroundColor: 'rgba(100, 100, 100, 0.6)',
+			borderColor: 'rgba(100, 100, 100, 1)'
 		}
 	}
 
 	buildDatasetRestricoes(regioes) {
-		// console.log('---dataset restricoes');
 		let indice = -1;
 		return regioes.map(p => {
 			indice++;
 			return {
 				type: 'line',
-				fill: 'zero',
+				fill: p[0].op === '>=' ? 'end' : p[0].op === '<=' ? 'origin' : false,
 				showLine: true,
 				label: 'R' + (indice + 1),
 				data: p,
@@ -226,7 +255,7 @@ export class GraficoComponent implements OnInit {
 		return x1 * this.funcao[1] + x2 * this.funcao[2];
 	}
 
-	buildChart(coordRegioesRestricoes, coordRegiaoInteresse, melhorPonto) {
+	loadChart(coordRegioesRestricoes, coordRegiaoInteresse, melhorPonto) {
 		let dataset = [];
 		dataset.push(this.buildDatasetMelhorPonto(melhorPonto));
 		dataset.push(this.builDatasetInteresse(coordRegiaoInteresse));
@@ -237,11 +266,27 @@ export class GraficoComponent implements OnInit {
 		let maxX = Math.max(...dataset.map(ds => Math.max(...ds.data.map(dt => dt.x == this.infinity ? 0 : dt.x)))) + 10;
 		let maxY = Math.max(...dataset.map(ds => Math.max(...ds.data.map(dt => dt.y == this.infinity ? 0 : dt.y)))) + 10;
 
+		dataset.map(dt => {
+			let data = [];
+			dt.data.map(p => {
+				data.add(p, dd => Math.round(p.x) == Math.round(dd.x) && Math.round(p.y) == Math.round(dd.y));
+			});
+			dt.data = data;
+		}));
+
+		console.log('datasetFormated', dataset);
+		this.chart.data.datasets = dataset;
+		this.chart.options.scales.xAxes[0].ticks.max =maxX;
+		this.chart.options.scales.yAxes[0].ticks.max =maxY;
+		this.chart.update();
+	}
+
+	buildChart() {
 		this.chart = new Chart('canvas', {
 			type: 'scatter',
 			lineTension: 0,
 			data: {
-				datasets: dataset
+				datasets: []
 			},
 			options: {
 				title: {
@@ -277,7 +322,7 @@ export class GraficoComponent implements OnInit {
 						position: 'bottom',
 						ticks: {
 							min: 0,
-							max: maxX
+							max: 0
 						}
 					}],
 					yAxes: [{
@@ -285,7 +330,7 @@ export class GraficoComponent implements OnInit {
 						position: 'bottom',
 						ticks: {
 							min: 0,
-							max: maxY
+							max: 0
 						}
 					}]
 				}
