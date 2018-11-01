@@ -1,12 +1,8 @@
-<mat-vertical-stepper class='form' [linear]="isLinear" #stepper>
+<mat-horizontal-stepper class='stpper form' style='height: 100%;' [linear]="isLinear" #stepper>
 	
-	<mat-step *ngIf="showGraficoComp">
-		<ng-template matStepLabel>Gráfico</ng-template>
-		<app-grafico></app-grafico>
-	</mat-step>
 	
 	<mat-step [stepControl]="funcaoFormGroup">
-		<ng-template matStepLabel>Defina a Função Objetiva</ng-template>
+		<ng-template matStepLabel>Função Objetiva</ng-template>
 
 		<form class='step' [formGroup]="funcaoFormGroup">
 			<mat-form-field class='full-width'>
@@ -31,7 +27,7 @@
 
 
 	<mat-step [stepControl]="restricaoFormGroup">
-		<ng-template matStepLabel>Defina as Restrições</ng-template>
+		<ng-template matStepLabel>Restrições</ng-template>
 		<form  class='step' [formGroup]="restricaoFormGroup">
 			<div class='restricao' *ngFor="let r of rIndice">
 				<span [class.restricao-x]='xIndice.length>2'>
@@ -61,11 +57,11 @@
 				<button mat-raised-button color='primary' (click)='addR()'>ADICIONAR RESTRIÇÃO</button>
 			</div>
 
+		</form>
 			<div class='action'>
 				<button mat-button matStepperPrevious>Voltar</button>
-				<button mat-raised-button color='primary' matStepperNext (click)='teste()'>AVANÇAR</button>
+				<button mat-raised-button color='primary' matStepperNext >AVANÇAR</button>
 			</div>
-		</form>
 	</mat-step>
 
 	<mat-step>
@@ -112,7 +108,13 @@
 		<app-simplex></app-simplex>
 	</mat-step>
 
+	<mat-step *ngIf="showGraficoComp">
+		<ng-template matStepLabel>Gráfico</ng-template>
+		<app-grafico></app-grafico>
+	</mat-step>
+	
 
-</mat-vertical-stepper>
+
+</mat-horizontal-stepper>
 
 
