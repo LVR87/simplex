@@ -12,7 +12,7 @@ import Chart from 'chart.js';
 export class GraficoComponent implements OnInit {
 
 	@ViewChild('canvas') canvas: ElementRef;
-	chart: any[] = [];
+	chart: any;
 
 
 	@Input() restricoes: any[];
@@ -61,16 +61,8 @@ export class GraficoComponent implements OnInit {
 
 	loadComponents() {
 		let coordRegioesRestricoes = this.buildRegiaoResticao(Object.assign([], this.restricoes));
-		console.log('coordRegioesRestricoes', coordRegioesRestricoes);
-
 		let coordRegiaoInteresse = this.loadRegiaoInteresse(Object.assign([], this.restricoes)).filter(r => r.p.t);
-		console.log('coordRegiaoInteresse', coordRegiaoInteresse);
-
 		let melhorPonto = this.loadMelhorPontoInteresse(coordRegiaoInteresse);
-
-
-		console.log('melhorPonto', melhorPonto);
-
 		this.loadChart(coordRegioesRestricoes, coordRegiaoInteresse, melhorPonto);
 	}
 
@@ -83,7 +75,6 @@ export class GraficoComponent implements OnInit {
 	}
 
 	testeRegiao(x1, x2) {
-		// console.log('--- testeRegiao( ' + x1 + ' , ' + x2 + ' )');
 		return this.restricoes.map(r => {
 			let soma = (r[2] * Math.round(x1)) + (r[3] * Math.round(x2));
 			let t;
@@ -98,7 +89,6 @@ export class GraficoComponent implements OnInit {
 					t = soma <= r[0];
 					break;
 			}
-			// console.log(r[2] + ' * ' + x1 + '  +  ' + r[3] + ' * ' + x2 + ' = ' + soma, r[1], r[0], t);
 			return t;
 		}).filter(r => !r).length == 0;
 	}
@@ -151,10 +141,7 @@ export class GraficoComponent implements OnInit {
 	}
 
 	loadRegiaoInteresse(restricoes) {
-		console.log('---- interesse');
 		let regioes = this.buildRegiaoResticao(restricoes);
-		console.log('regioes', regioes);
-
 		let mX = Math.max(...regioes.map(p => Math.max(...p.map(p => p.x !== this.infinity ? p.x : 0))));
 		let mY = Math.max(...regioes.map(p => Math.max(...p.map(p => p.y !== this.infinity ? p.y : 0))));
 		//equacao geral de reta 
@@ -221,9 +208,6 @@ export class GraficoComponent implements OnInit {
 
 		let data = [];
 		dataTemp.map(d => data.add(d, o => o.x == d.x && o.y == d.y));
-
-		console.log('builDatasetInteresse', data);
-
 		return {
 			type: 'scatter',
 			// fill: 'origin',
@@ -261,8 +245,6 @@ export class GraficoComponent implements OnInit {
 		dataset.push(this.builDatasetInteresse(coordRegiaoInteresse));
 		dataset.addRange(this.buildDatasetRestricoes(coordRegioesRestricoes));
 
-		console.log('dataset', dataset);
-
 		let maxX = Math.max(...dataset.map(ds => Math.max(...ds.data.map(dt => dt.x == this.infinity ? 0 : dt.x)))) + 10;
 		let maxY = Math.max(...dataset.map(ds => Math.max(...ds.data.map(dt => dt.y == this.infinity ? 0 : dt.y)))) + 10;
 
@@ -272,9 +254,8 @@ export class GraficoComponent implements OnInit {
 				data.add(p, dd => Math.round(p.x) == Math.round(dd.x) && Math.round(p.y) == Math.round(dd.y));
 			});
 			dt.data = data;
-		}));
+		});
 
-		console.log('datasetFormated', dataset);
 		this.chart.data.datasets = dataset;
 		this.chart.options.scales.xAxes[0].ticks.max =maxX;
 		this.chart.options.scales.yAxes[0].ticks.max =maxY;
